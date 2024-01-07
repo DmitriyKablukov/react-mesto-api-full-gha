@@ -7,7 +7,7 @@
     "start": "node app.js",
     "lint": "npx eslint .",
     "dev": "nodemon app.js",
-    "deploy": "scp -r ../backend/* kablukov-admin@158.160.116.154:/home/kablukov-admin/backend"
+    "deploy": "scp -r ../backend/* kablukov-admin@158.160.116.154:/home/kablukov-admin/express-mesto-gha"
   },
   "author": "",
   "license": "ISC",
