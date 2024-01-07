@@ -1,0 +1,11 @@
+.profile__top-bar {
+    display: flex;
+    align-items: center;
+    margin: 0 0 3px 0;
+}
+
+@media screen and (max-width: 900px) {
+    .profile__top-bar {
+        margin-bottom: 5px;
+    }
+}
