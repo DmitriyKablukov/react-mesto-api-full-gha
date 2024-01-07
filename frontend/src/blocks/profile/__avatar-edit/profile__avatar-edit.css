@@ -1,0 +1,28 @@
+.profile__avatar-edit {
+    width: 121px;
+    height: 121px;
+    border-radius: 50%;
+    margin-right: 30px;
+    background: url('../../../images/avatar-overlay.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    outline: none;
+    padding: 0;
+    background-size: 26px 26px;
+}
+
+.profile__avatar-edit::before {
+  opacity: 0;
+}
+
+.profile__avatar-edit::before:hover {
+  opacity: .2;
+  transition: opacity 0.5s;
+}
+
+@media screen and (max-width: 900px) {
+    .profile__avatar-edit {
+        margin-right: 0;
+    }
+}

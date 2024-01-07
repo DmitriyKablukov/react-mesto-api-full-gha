@@ -1,0 +1,11 @@
+.element {
+    width: 282px;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    object-fit: cover;
+    justify-self: center;
+    position: relative;
+}

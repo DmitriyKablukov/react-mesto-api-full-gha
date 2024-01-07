@@ -1,0 +1,18 @@
+.popup__error {
+  margin: 0;
+  margin-top: 5px;
+  color: rgba(255, 0, 0, 1);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  position: absolute;
+}
+
+.popup__error:last-of-type {
+  top: 88px;
+}
+
+.popup__error:first-of-type {
+  top: 28px;
+}
