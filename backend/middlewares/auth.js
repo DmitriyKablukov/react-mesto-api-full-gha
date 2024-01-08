@@ -18,7 +18,7 @@ module.exports = (req, res, next) => {
     if (err.name === 'JsonWebTokenError') {
       return next(new IncorrectEmailPasswordError('С токеном что-то не так'));
     }
-    return next();
+    return next(new IncorrectEmailPasswordError('Необходима авторизация'));
   }
   req.user = payload;
   next();

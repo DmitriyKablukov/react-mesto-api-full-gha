@@ -7,7 +7,6 @@ const STATUS_CODE = require('../utils/constants');
 const BadRequestError = require('../errors/bad-request');
 const NotFoundError = require('../errors/not-found');
 const ConflictError = require('../errors/conflict');
-const ValidationError = require('../errors/validation');
 const IncorrectEmailPasswordError = require('../errors/incorrect');
 
 const getUsers = (req, res, next) => {
@@ -17,17 +16,14 @@ const getUsers = (req, res, next) => {
 };
 
 const getUser = (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
-    return next(new BadRequestError('Передан некорректный _id пользователя'));
-  }
-  return User.findById(req.params.userId)
-    .orFail(new Error('NotValidId'))
+  User.findById(req.params.userId)
+    .orFail(new NotFoundError('Пользователь по указанному _id не найден'))
     .then((user) => {
       res.status(STATUS_CODE.OK_CODE).send({ user });
     })
     .catch((err) => {
-      if (err.message === 'NotValidId') {
-        return next(new NotFoundError('Пользователь по указанному _id не найден'));
+      if (err.message === 'CastError') {
+        return next(new BadRequestError('Передан некорректный _id пользователя'));
       }
       return next(err);
     });
@@ -52,8 +48,8 @@ const createUser = async (req, res, next) => {
   } catch (err) {
     if (err.code === STATUS_CODE.MONGO_DUPLICATE_ERROR_CODE) {
       next(new ConflictError('Такой пользователь уже существует'));
-    } else if (err.name === 'ValidationError') {
-      next(new ValidationError('Переданы некорректные данные при создании пользователя'));
+    } else if (err.name === 'BadRequestError') {
+      next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
     } else {
       next(err);
     }
@@ -65,10 +61,10 @@ const login = async (req, res, next) => {
   try {
     const userAuth = await User.findOne({ email })
       .select('+password')
-      .orFail(new Error('NotAuthenticate'));
+      .orFail(new NotFoundError('Пользователь по указанному _id не найден'));
     const matched = await bcrypt.compare(password, userAuth.password);
     if (!matched) {
-      throw new Error('NotAuthenticate');
+      throw new NotFoundError('Пользователь по указанному _id не найден');
     }
     const { NODE_ENV, JWT_SECRET } = process.env;
     const token = jwt.sign(
@@ -82,7 +78,7 @@ const login = async (req, res, next) => {
     }).status(STATUS_CODE.OK_CODE)
       .send({ token });
   } catch (err) {
-    if (err.message === 'NotAuthenticate') {
+    if (err.message === 'CastError') {
       return next(new IncorrectEmailPasswordError('Неправильный email или пароль'));
     }
     return next(err);
@@ -101,14 +97,14 @@ const updateProfile = (req, res, next) => {
       runValidators: true,
       new: true,
     })
-      .orFail(new Error('NotFound'))
+      .orFail(new NotFoundError('Пользователь по указанному _id не найден'))
       .then((user) => res.status(STATUS_CODE.OK_CODE).send({ user }))
       .catch((err) => {
-        if (err.message === 'NotFound') {
-          return next(new NotFoundError('Пользователь c указанным _id не найден'));
+        if (err.message === 'CastError') {
+          return next(new NotFoundError('Передан некорректный _id'));
         }
-        if (err.name === 'ValidationError') {
-          return next(new ValidationError('Переданы некорректные данные при обновлении профиля'));
+        if (err.name === 'BadRequestError') {
+          return next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
         }
         return next(err);
       });
@@ -128,14 +124,14 @@ const updateAvatar = (req, res, next) => {
         new: true,
       },
     )
-      .orFail(new Error('NotFound'))
+      .orFail(new NotFoundError('Пользователь по указанному _id не найден'))
       .then((user) => res.status(STATUS_CODE.OK_CODE).send({ user }))
       .catch((err) => {
-        if (err.message === 'NotFound') {
-          return next(new NotFoundError('Пользователь c указанным _id не найден'));
+        if (err.message === 'CastError') {
+          return next(new NotFoundError('Передан некорректный _id'));
         }
-        if (err.name === 'ValidationError') {
-          return next(new ValidationError('Переданы некорректные данные при обновлении профиля'));
+        if (err.name === 'BadRequestError') {
+          return next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
         }
         return next(err);
       });
@@ -154,8 +150,8 @@ const getMe = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return next(new ValidationError('Переданы некорректные данные при обновлении профиля'));
+      if (err.name === 'BadRequestError') {
+        return next(new BadRequestError('Передан некорректный _id пользователя'));
       }
       return next(err);
     });

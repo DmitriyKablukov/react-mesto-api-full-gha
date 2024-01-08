@@ -1,8 +1,6 @@
 /* eslint-disable consistent-return */
-const mongoose = require('mongoose');
 const Card = require('../models/card');
 const STATUS_CODE = require('../utils/constants');
-const ValidationError = require('../errors/validation');
 const BadRequestError = require('../errors/bad-request');
 const NotFoundError = require('../errors/not-found');
 const NoAccessError = require('../errors/no-access');
@@ -19,8 +17,8 @@ const createCard = (req, res, next) => {
   return Card.create(cardData)
     .then((card) => res.status(STATUS_CODE.CREATE_CODE).send({ card }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new ValidationError('Переданы некорректные данные при создании карточки'));
+      if (err.name === 'BadRequestError') {
+        next(new BadRequestError('Переданы некорректные данные при создании карточки'));
       } else {
         next(err);
       }
@@ -28,9 +26,6 @@ const createCard = (req, res, next) => {
 };
 
 const deleteCard = (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.cardId)) {
-    return next(new BadRequestError('Передан некорректный _id карточки'));
-  }
   const removeCard = () => {
     Card.findByIdAndDelete(req.params.cardId)
       .then(() => res.status(STATUS_CODE.OK_CODE).send({ message: 'Карточка удалена' }))
