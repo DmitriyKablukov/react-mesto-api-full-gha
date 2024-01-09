@@ -1,5 +1,20 @@
 const { celebrate, Joi } = require('celebrate');
-const { isLink } = require('../utils/isLink');
+const BadRequestError = require('../errors/bad-request');
+const { validationLink } = require('../utils/isLink');
+
+const validationUrl = (url) => {
+  if (validationLink(url)) {
+    return url;
+  }
+  throw new BadRequestError('Некорректный адрес');
+};
+
+const validationId = (id) => {
+  if (/^[0-9a-fA-F]{24}$/.test(id)) {
+    return id;
+  }
+  throw new BadRequestError('Некорретный id');
+};
 
 const validationSignIn = celebrate({
   body: Joi.object().keys({
@@ -12,7 +27,7 @@ const validationSignUp = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().pattern(isLink),
+    avatar: Joi.string().custom(validationUrl),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
@@ -27,26 +42,26 @@ const validationUpdateProfile = celebrate({
 
 const validationUpdateAvatar = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().pattern(isLink).required(),
+    avatar: Joi.string().custom(validationUrl).required(),
   }),
 });
 
 const validationGetUser = celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().length(24).hex().required(),
+    userId: Joi.string().required().custom(validationId),
   }),
 });
 
 const validationCreateCard = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().pattern(isLink),
+    link: Joi.string().required().custom(validationUrl),
   }),
 });
 
 const validationFindCardById = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().length(24).hex().required(),
+    cardId: Joi.string().required().custom(validationId),
   }),
 });
 

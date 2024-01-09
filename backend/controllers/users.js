@@ -47,7 +47,7 @@ const createUser = async (req, res, next) => {
   } catch (err) {
     if (err.code === STATUS_CODE.MONGO_DUPLICATE_ERROR_CODE) {
       next(new ConflictError('Такой пользователь уже существует'));
-    } else if (err.name === 'BadRequestError') {
+    } else if (err.name === 'ValidationError') {
       next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
     } else {
       next(err);
@@ -60,10 +60,10 @@ const login = async (req, res, next) => {
   try {
     const userAuth = await User.findOne({ email })
       .select('+password')
-      .orFail(new NotFoundError('Пользователь по указанному _id не найден'));
+      .orFail(new IncorrectEmailPasswordError('Пользователь не найден'));
     const matched = await bcrypt.compare(password, userAuth.password);
     if (!matched) {
-      throw new NotFoundError('Пользователь по указанному _id не найден');
+      throw new IncorrectEmailPasswordError('Неправильный email или пароль');
     }
     const { NODE_ENV, JWT_SECRET } = process.env;
     const token = jwt.sign(
@@ -75,9 +75,9 @@ const login = async (req, res, next) => {
       maxAge: '604800',
       httpOnly: true,
     }).status(STATUS_CODE.OK_CODE)
-      .send({ token });
+      .send({ message: 'Авторизация успешна' });
   } catch (err) {
-    if (err.message === 'CastError') {
+    if (err.message === 'NotAuthenticate') {
       return next(new IncorrectEmailPasswordError('Неправильный email или пароль'));
     }
     return next(err);
@@ -102,7 +102,7 @@ const updateProfile = (req, res, next) => {
         if (err.message === 'CastError') {
           return next(new NotFoundError('Передан некорректный _id'));
         }
-        if (err.name === 'BadRequestError') {
+        if (err.name === 'ValidationError') {
           return next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
         }
         return next(err);
@@ -129,7 +129,7 @@ const updateAvatar = (req, res, next) => {
         if (err.message === 'CastError') {
           return next(new NotFoundError('Передан некорректный _id'));
         }
-        if (err.name === 'BadRequestError') {
+        if (err.name === 'ValidationError') {
           return next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
         }
         return next(err);
@@ -149,7 +149,7 @@ const getMe = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'BadRequestError') {
+      if (err.name === 'CastError') {
         return next(new BadRequestError('Передан некорректный _id пользователя'));
       }
       return next(err);

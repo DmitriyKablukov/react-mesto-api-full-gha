@@ -7,7 +7,7 @@
 
 ## Ссылки на проект
 
-IP-адрес 158.160.116.154
+IP 158.160.116.154
 
 Frontend https://mesto.kablukov.nomoredomainsmonster.ru/
 
