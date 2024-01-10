@@ -77,9 +77,6 @@ const login = async (req, res, next) => {
     }).status(STATUS_CODE.OK_CODE)
       .send({ message: 'Авторизация успешна' });
   } catch (err) {
-    if (err.message === 'NotAuthenticate') {
-      return next(new IncorrectEmailPasswordError('Неправильный email или пароль'));
-    }
     return next(err);
   }
 };
@@ -99,9 +96,6 @@ const updateProfile = (req, res, next) => {
       .orFail(new NotFoundError('Пользователь по указанному _id не найден'))
       .then((user) => res.status(STATUS_CODE.OK_CODE).send({ user }))
       .catch((err) => {
-        if (err.message === 'CastError') {
-          return next(new NotFoundError('Передан некорректный _id'));
-        }
         if (err.name === 'ValidationError') {
           return next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
         }
@@ -126,9 +120,6 @@ const updateAvatar = (req, res, next) => {
       .orFail(new NotFoundError('Пользователь по указанному _id не найден'))
       .then((user) => res.status(STATUS_CODE.OK_CODE).send({ user }))
       .catch((err) => {
-        if (err.message === 'CastError') {
-          return next(new NotFoundError('Передан некорректный _id'));
-        }
         if (err.name === 'ValidationError') {
           return next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
         }
