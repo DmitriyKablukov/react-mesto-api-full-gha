@@ -139,12 +139,7 @@ const getMe = (req, res, next) => {
         return res.status(STATUS_CODE.OK_CODE).send({ user });
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new BadRequestError('Передан некорректный _id пользователя'));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
 module.exports = {
